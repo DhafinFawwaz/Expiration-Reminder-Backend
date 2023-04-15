@@ -3,6 +3,20 @@ import express from 'express'
 import process from 'process'
 import { getDescription } from './gpt_helper.js'
 
+const mongoose = require('mongoose')
+const mongoData = process.env.DATABASE_URL;
+
+mongoose.connect(mongoData)
+const database = mongoose.connection;
+
+database.on('error', (error) => {
+  console.log(error)
+})
+
+database.once('connected', () => {
+  console.log('Connected to Database')
+})
+
 dotenv.config()
 const app = express()
 app.use(express.json())
