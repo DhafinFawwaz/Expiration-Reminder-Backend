@@ -15,7 +15,7 @@ export async function getDescription(productName) {
       // model: "gpt-3.5-turbo",
       model: "text-davinci-003",
       prompt: `When does ${productName} usually expire? Please explain in 10-35 words`,
-      max_tokens: 50,
+      max_tokens: 100,
     })
     const description = trim(response.data.choices[0].text)
     return description
