@@ -8,7 +8,7 @@ dotenv.config()
 const app = express()
 app.use(express.json())
 
-const mongoData = process.env.DATABASE_URL;
+const mongoData = process.env.MONGODB_URI;
 mongoose.connect(mongoData)
 const database = mongoose.connection;
 
