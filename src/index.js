@@ -31,13 +31,30 @@ app.get("/api", async (req, res) => {
   let description = ""
 
   // MongoDB Database
+  
+  const dataSchema = new mongoose.Schema({
+    productname: {
+        required: true,
+        type: String
+    },
+    desc: {
+        required: true,
+        type: String
+    }
+})
+  
+  const collection = new mongoose.model('tes', dataSchema)
+  
+  
   if(database.collection.find({productname: productName}).count() > 0) {
     database.collection.find({productname: productName}, (error, data) => {
       if(error){
         console.log(error)
       }else{
         description = data;
+        collection.insertMany([data])
         console.log(description)
+        
       }
       }
       )
