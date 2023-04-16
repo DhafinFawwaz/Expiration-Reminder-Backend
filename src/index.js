@@ -2,8 +2,7 @@ import * as dotenv from 'dotenv'
 import express from 'express'
 import process from 'process'
 import { getDescription } from './gpt_helper.js'
-
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const mongoData = process.env.DATABASE_URL;
 
 mongoose.connect(mongoData)
