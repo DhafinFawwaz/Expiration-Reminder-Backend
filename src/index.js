@@ -20,6 +20,17 @@ dotenv.config()
 const app = express()
 app.use(express.json())
 
+const dataSchema = new mongoose.Schema({
+  productname: {
+      required: true,
+      type: String
+  },
+  desc: {
+      required: true,
+      type: String
+  }
+})
+
 
 app.get("/api", async (req, res) => {
   const productName = req.query.productName;
@@ -30,47 +41,33 @@ app.get("/api", async (req, res) => {
   let description = ""
 
   // MongoDB Database
-  
-  const dataSchema = new mongoose.Schema({
-    productname: {
-        required: true,
-        type: String
-    },
-    desc: {
-        required: true,
-        type: String
-    }
-})
-  
   const collection = new mongoose.model('tes', dataSchema)
-  
-  
   if(database.collection.find({productname: productName}).count() > 0) {
     database.collection.find({productname: productName}, (error, data) => {
       if(error){
-        console.log(error)
-      }else{
-        description = data.desc;
-        console.log(description)
+          console.log(error)
+        }else{
+          description = data.desc;
+          console.log("Found description in database\ndata.desc: "+description);
+        }
       }
-      }
-      )
-      }
+    )
+  }
   else{
-    
 
-  //
-
-  // Call the GPT-3 API
+    // Call the GPT-3 API
+    console.log("Calling GPT-3 API\nproductName: " + productName)
     description = await getDescription(productName) 
     data = {
       productname: productName,
       desc: description
     }
+    console.log("\nInserting data into database");
     collection.insertMany([data])
-    console.log(description);
+    console.log("description: "+description);
   }
 
+  console.log("Respond: "+description);
   res.send(description);
 })
 
