@@ -51,7 +51,7 @@ app.get("/api", async (req, res) => {
       if(error){
         console.log(error)
       }else{
-        description = data;
+        description = data.desc;
         console.log(description)
       }
       }
