@@ -52,9 +52,7 @@ app.get("/api", async (req, res) => {
         console.log(error)
       }else{
         description = data;
-        collection.insertMany([data])
         console.log(description)
-        
       }
       }
       )
@@ -66,6 +64,11 @@ app.get("/api", async (req, res) => {
 
   // Call the GPT-3 API
     description = await getDescription(productName) 
+    data = {
+      productname: productName,
+      desc: description
+    }
+    collection.insertMany([data])
     console.log(description);
   }
 
