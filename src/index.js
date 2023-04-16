@@ -2,9 +2,13 @@ import * as dotenv from 'dotenv'
 import express from 'express'
 import process from 'process'
 import { getDescription } from './gpt_helper.js'
-import mongoose from 'mongoose'
-const mongoData = process.env.DATABASE_URL;
+import mongoose, { mongo } from 'mongoose'
 
+dotenv.config()
+const app = express()
+app.use(express.json())
+
+const mongoData = process.env.DATABASE_URL;
 mongoose.connect(mongoData)
 const database = mongoose.connection;
 
@@ -16,9 +20,7 @@ database.once('connected', () => {
   console.log('Connected to Database')
 })
 
-dotenv.config()
-const app = express()
-app.use(express.json())
+
 
 const dataSchema = new mongoose.Schema({
   productname: {
@@ -33,8 +35,10 @@ const dataSchema = new mongoose.Schema({
 
 
 app.get("/api", async (req, res) => {
+  console.log("\nRequesting description...");
   const productName = req.query.productName;
   if(productName === "" || productName === undefined) {
+    console.log("No productName provided");
     res.send("Please provide a product name")
     return
   }
@@ -42,32 +46,32 @@ app.get("/api", async (req, res) => {
 
   // MongoDB Database
   const collection = new mongoose.model('tes', dataSchema)
-  if(database.collection.find({productname: productName}).count() > 0) {
-    database.collection.find({productname: productName}, (error, data) => {
-      if(error){
-          console.log(error)
-        }else{
-          description = data.desc;
-          console.log("Found description in database\ndata.desc: "+description);
-        }
+  await collection.find({productname: productName}).limit(1).then(async (data, error) => {
+    if(error){ // Error
+      console.log(error);
+      return
+    }else if(data.length > 0){ // productName found
+      description = data[0].desc;
+      console.log("Found description in database\ndata.desc: "+description);
+      return
+    }else{ // productName not found
+      // Call the GPT-3 API
+      console.log("No description found in database");
+      
+      console.log("\nCalling GPT-3 API\nproductName: " + productName)
+      description = await getDescription(productName) 
+      const data = {
+        productname: productName,
+        desc: description
       }
-    )
-  }
-  else{
-
-    // Call the GPT-3 API
-    console.log("Calling GPT-3 API\nproductName: " + productName)
-    description = await getDescription(productName) 
-    data = {
-      productname: productName,
-      desc: description
+      console.log("\nInserting data into database");
+      collection.insertMany([data])
+      console.log("description: "+description);
+      
+      return
     }
-    console.log("\nInserting data into database");
-    collection.insertMany([data])
-    console.log("description: "+description);
-  }
+  })
 
-  console.log("Respond: "+description);
   res.send(description);
 })
 
