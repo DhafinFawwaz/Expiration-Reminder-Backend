@@ -31,12 +31,26 @@ app.get("/api", async (req, res) => {
   let description = ""
 
   // MongoDB Database
+  if(database.collection.find({productname: productName}).count() > 0) {
+    database.collection.find({productname: productName}, (error, data) => {
+      if(error){
+        console.log(error)
+      }else{
+        description = data;
+        console.log(description)
+      }
+      }
+      )
+      }
+  else{
+    
 
   //
 
   // Call the GPT-3 API
-  // description = await getDescription(productName) 
-  // console.log(description);
+    description = await getDescription(productName) 
+    console.log(description);
+  }
 
   res.send(description);
 })
